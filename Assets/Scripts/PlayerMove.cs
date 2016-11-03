@@ -4,25 +4,23 @@ using UnityEngine.Networking;
 public class PlayerMove : NetworkBehaviour
 {
     public GameObject bulletPrefab;
+    public float speed = 10f;
 
     void Update()
     {
         if (!isLocalPlayer)
             return;
         
-        var x = Input.GetAxis("Horizontal")*0.1f;
-        var z = Input.GetAxis("Vertical")*0.1f;
+        var x = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
 
         if (Input.GetKeyDown(KeyCode.Space))
-//            Fire();
             CmdFire();
 
-        transform.Translate(x, 0, z);
-    }
-
-    public override void OnStartLocalPlayer()
-    {
-        GetComponent<MeshRenderer>().material.color = Color.red;
+        var xLimit = ScreenUtils.singleton.x;
+        if ((transform.position.x > -xLimit && x < 0)
+            || (transform.position.x < xLimit && x > 0)
+            )
+            transform.Translate(x, 0f, 0f);
     }
 
     [Command]
