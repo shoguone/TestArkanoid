@@ -2,9 +2,17 @@
 using UnityEngine.Networking;
 using System.Collections;
 
-public class MyNetworkManager : NetworkManager
+public class ObservingNetworkManager : NetworkManager
 {
+    public static ObservingNetworkManager observingSingleton
+    {
+        get { return singleton as ObservingNetworkManager; }
+    }
+
     NetworkConnection hostPlayerConnection = null;
+
+    public delegate void NetworkAction();
+    public NetworkAction ClientStopped;
 
     bool RememberHostPlayer(NetworkConnection conn)
     {
@@ -17,7 +25,7 @@ public class MyNetworkManager : NetworkManager
         else
         {
             isRemembered = false;
-            Debug.Log("doesn't add a player");
+            Debug.Log("player isn't added");
         }
         return isRemembered;
     }
@@ -36,6 +44,7 @@ public class MyNetworkManager : NetworkManager
             base.OnServerAddPlayer(conn, playerControllerId);
     }
 
+    /**
     public override void OnServerRemovePlayer(NetworkConnection conn, PlayerController player)
     {
         Debug.Log("OnServerRemovePlayer");
@@ -108,6 +117,7 @@ public class MyNetworkManager : NetworkManager
         Debug.Log("OnMatchList");
         base.OnMatchList(success, extendedInfo, matchList);
     }
+    /**/
 
     public override void OnServerAddPlayer(NetworkConnection conn, short playerControllerId, NetworkReader extraMessageReader)
     {
@@ -116,6 +126,7 @@ public class MyNetworkManager : NetworkManager
             base.OnServerAddPlayer(conn, playerControllerId, extraMessageReader);
     }
 
+    /**
     public override void OnServerConnect(NetworkConnection conn)
     {
         Debug.Log("OnServerConnect");
@@ -170,16 +181,19 @@ public class MyNetworkManager : NetworkManager
         base.OnStartServer();
     }
 
-    public override void OnStopClient()
-    {
-        Debug.Log("OnStopClient");
-        base.OnStopClient();
-    }
-
     public override void OnStopHost()
     {
         Debug.Log("OnStopHost");
         base.OnStopHost();
+    }
+    /**/
+
+    public override void OnStopClient()
+    {
+        Debug.Log("OnStopClient");
+        if (ClientStopped != null)
+            ClientStopped();
+        base.OnStopClient();
     }
 
     public override void OnStopServer()
@@ -189,6 +203,7 @@ public class MyNetworkManager : NetworkManager
         base.OnStopServer();
     }
 
+    /**
     public override void ServerChangeScene(string newSceneName)
     {
         Debug.Log("ServerChangeScene");
@@ -212,5 +227,7 @@ public class MyNetworkManager : NetworkManager
         Debug.Log("StartHost(1)");
         return base.StartHost(info);
     }
+    /**/
+
 
 }

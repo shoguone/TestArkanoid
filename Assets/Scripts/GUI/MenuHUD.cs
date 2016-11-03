@@ -6,43 +6,48 @@ using UnityEngine.UI;
 public class MenuHUD : MonoBehaviour
 {
     public InputField addressInput;
+    public MenuPanelManager panelManager;
+    public Animator connectPanel;
+
+    private bool isConnecting = false;
 
     void Awake()
     {
+        Time.timeScale = 1f;
+
         if (addressInput == null)
         {
             addressInput = this.FindUiComponentByName<InputField>("AddressInputField");
         }
-//        addressInput.text = MyNetworkManager.singleton.networkAddress;
-//        var manager = FindObjectOfType<MyNetworkManager>();
-//        if (manager != null)
-//        {
-//            addressInput.text = manager.networkAddress;
-//        }
-//        else
-//        {
-//            addressInput.text = "Where is MyNetworkManager?!";
-//        }
     }
 
     void Start()
     {
-        addressInput.text = MyNetworkManager.singleton.networkAddress;
+        addressInput.text = ObservingNetworkManager.singleton.networkAddress;
     }
 
     public void StartHost()
     {
-        MyNetworkManager.singleton.StartHost();
+        ObservingNetworkManager.singleton.StartHost();
     }
 
     public void StartClient()
     {
-        MyNetworkManager.singleton.StartClient();
+        ObservingNetworkManager.singleton.StartClient();
+        isConnecting = true;
+        ObservingNetworkManager.observingSingleton.ClientStopped += delegate()
+        {
+            if (isConnecting && panelManager != null && connectPanel != null)
+            {
+                panelManager.OpenPanel(connectPanel);
+            }
+            isConnecting = false;
+        };
     }
 
     public void OnAddressChanged()
     {
-        MyNetworkManager.singleton.networkAddress = addressInput.text;
+        ObservingNetworkManager.singleton.networkAddress = addressInput.text;
     }
 
     public void ExitGame()
